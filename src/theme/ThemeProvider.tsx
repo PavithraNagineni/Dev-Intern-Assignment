@@ -37,19 +37,26 @@ function loadPersisted(
 ): PersistedState {
   for (const key of [storageKey, ...legacyStorageKeys]) {
     if (!key) continue;
+
     try {
       const raw = localStorage.getItem(key);
+
       if (raw) {
         const parsed = JSON.parse(raw) as PersistedState;
+
         if (parsed.brand?.accentHex && parsed.appearance) {
           return parsed;
         }
       }
     } catch {
-      // Corrupt state falls through to the next key / default preset.
+  
     }
   }
-  return { brand: defaultPreset, appearance: 'light' };
+
+  return {
+    brand: defaultPreset,
+    appearance: 'light',
+  };
 }
 
 export function ThemeProvider({
@@ -61,45 +68,61 @@ export function ThemeProvider({
   extraLayers = [],
   children,
 }: {
-  /** Layer 1 primitives — supplied by the active UI library. */
   globalTokens?: TokenLayerDef;
-  /** Semantic-layer builder — the library composes the shared core with its
-   *  own status/domain slots. */
+
+
   buildSemantic?: (brand: BrandDefinition) => TokenLayerDef;
+
   defaultPreset?: BrandDefinition;
-  /** Per-library persistence key (prism-ui-theme:<libraryId>). */
+
   storageKey?: string;
-  /** Read-once fallbacks for state saved under former app names, newest
-   *  first; never written. */
+
   legacyStorageKeys?: string[];
-  /** Higher layers (e.g. component tokens) merged on top of global+semantic. */
+
   extraLayers?: TokenLayerDef[];
+
   children: React.ReactNode;
 }) {
   const [persisted] = useState(() =>
     loadPersisted(storageKey, legacyStorageKeys, defaultPreset),
   );
+
   const [brand, setBrand] = useState<BrandDefinition>(persisted.brand);
+
   const [appearance, setAppearance] = useState<Appearance>(
     persisted.appearance,
   );
 
-  const semantic = useMemo(() => buildSemantic(brand), [buildSemantic, brand]);
+  useEffect(() => {
+    const p = loadPersisted(storageKey, legacyStorageKeys, defaultPreset);
+    setBrand(p.brand);
+    setAppearance(p.appearance);
+  }, [storageKey, defaultPreset]);
+
+  const semantic = useMemo(
+    () => buildSemantic(brand),
+    [buildSemantic, brand],
+  );
+
   const layers = useMemo(
-    () => [semantic, globalTokens, ...extraLayers],
+    () => [globalTokens, semantic, ...extraLayers],
     [globalTokens, semantic, extraLayers],
   );
+
   const emitted = useMemo(
     () => mergeEmitted(...layers.map(emitLayer)),
     [layers],
   );
 
-  // Vars go on <html> (not a wrapper div) so portalled content — Radix
-  // dialogs render into document.body — inherits the theme too.
   useEffect(() => {
     const el = document.documentElement;
+
     applyVars(el, emitted.base);
-    applyVars(el, appearance === 'light' ? emitted.light : emitted.dark);
+    applyVars(
+      el,
+      appearance === 'light' ? emitted.light : emitted.dark,
+    );
+
     el.classList.remove('light', 'dark');
     el.classList.add(appearance);
   }, [emitted, appearance]);
@@ -108,7 +131,10 @@ export function ThemeProvider({
     try {
       localStorage.setItem(
         storageKey,
-        JSON.stringify({ brand, appearance } satisfies PersistedState),
+        JSON.stringify({
+          brand,
+          appearance,
+        } satisfies PersistedState),
       );
     } catch {
       // Persistence is best-effort.
@@ -116,7 +142,14 @@ export function ThemeProvider({
   }, [storageKey, brand, appearance]);
 
   const value = useMemo(
-    () => ({ brand, setBrand, appearance, setAppearance, layers, emitted }),
+    () => ({
+      brand,
+      setBrand,
+      appearance,
+      setAppearance,
+      layers,
+      emitted,
+    }),
     [brand, appearance, layers, emitted],
   );
 

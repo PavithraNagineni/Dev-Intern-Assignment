@@ -139,7 +139,7 @@ export function buildSemanticTokens(
     {
       path: 'color.bg',
       type: 'color',
-      modes: { light: light.background, dark: dark.background },
+      alias: { layer: 'semantic', path: 'gray.1' },
     },
     {
       path: 'color.surface',
