@@ -35,7 +35,7 @@ const IMPORT_SOURCES: Record<string, string[]> = {
 const FIXTURES: Record<string, string> = {
   SAMPLE_STATIONS: '../components/data',
   SAMPLE_PRICE_BANDS: '../components/data',
-  SAMPLE_TARIFF_NOTES: '../components/tariffs',
+  SAMPLE_TARIFF_NOTES: '../components/data',
   SAMPLE_SESSION: '../components/data',
   SAMPLE_LOCATIONS: '../components/data',
   SAMPLE_RECEIPT_ITEMS: '../components/data',

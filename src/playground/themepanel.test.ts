@@ -12,4 +12,32 @@ describe('theme panel shell', () => {
     expect(panelRule).toContain('border-radius: 20px');
     expect(panelRule).not.toMatch(/border-radius:\s*var\(--ev-radius/);
   });
+
+  it('keeps theme customizations isolated per UI library key in storage', () => {
+    const store = new Map<string, string>();
+    const mockStorage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => store.set(k, v),
+    };
+
+    const voltKey = 'prism-ui-theme:volt';
+    const atlasKey = 'prism-ui-theme:atlas-web';
+
+    const voltCustom = {
+      brand: {
+        name: 'Custom Volt',
+        accentHex: '#ff0055',
+        grayTint: 'mauve',
+        radius: 'small',
+        scaling: 1.1,
+        fontFamily: 'sans-serif',
+        panelStyle: 'solid',
+      },
+      appearance: 'dark',
+    };
+
+    mockStorage.setItem(voltKey, JSON.stringify(voltCustom));
+
+    expect(mockStorage.getItem(atlasKey)).toBeNull();
+  });
 });

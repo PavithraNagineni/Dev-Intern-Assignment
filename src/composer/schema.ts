@@ -2,6 +2,8 @@ import type { Data } from '@puckeditor/core';
 import type { LibraryId } from '../libraries/types';
 import type { BrandDefinition } from '../tokens/brand';
 import { DEFAULT_PRESET } from '../theme/presets';
+import { ATLAS_PRESETS } from '../libraries/atlas-web/tokens/presets';
+import { ATLAS_CHARGE_PRESETS } from '../libraries/atlas-charge/tokens/presets';
 
 /**
  * ComposerDoc is the ONLY persisted shape — a canvas-layer-agnostic envelope
@@ -70,11 +72,23 @@ export function newScreen(
   };
 }
 
+export function defaultPresetFor(library: LibraryId): BrandDefinition {
+  switch (library) {
+    case 'atlas-web':
+      return ATLAS_PRESETS[0];
+    case 'atlas-charge':
+      return ATLAS_CHARGE_PRESETS[0];
+    case 'volt':
+    default:
+      return DEFAULT_PRESET;
+  }
+}
+
 export function createDoc(
   library: LibraryId,
-  brand: BrandDefinition = DEFAULT_PRESET,
+  brand?: BrandDefinition,
 ): ComposerDoc {
-  return { version: 2, library, brand, screens: [] };
+  return { version: 2, library, brand: brand ?? defaultPresetFor(library), screens: [] };
 }
 
 // ---------- pure screen operations (immutable) ----------

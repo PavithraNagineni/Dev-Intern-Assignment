@@ -2,6 +2,7 @@ import type { ConnectorType, Freshness } from './atoms';
 import type { ChargerStatus } from './status';
 
 export type { Freshness };
+export { SAMPLE_TARIFF_NOTES } from './tariffs';
 
 /** Sample fixtures for the playground showcases. */
 

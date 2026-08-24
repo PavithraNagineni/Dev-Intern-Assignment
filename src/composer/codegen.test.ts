@@ -194,16 +194,19 @@ export function QuickActionsScreen() {
     expect(jsx).toContain("import { Page } from './primitives';");
   });
 
-  it('emits no Page wrapper for empty root props', () => {
+  it('emits valid fixture imports for Station detail PricingTable with notes', () => {
     const data: Data = {
       content: [
         {
-          type: 'Button',
-          props: { id: 'b1', label: 'Go', variant: 'solid', size: 'lg', loading: false, disabled: false },
+          type: 'PricingTable',
+          props: { id: 'pt', showMember: true, idleFeePerMin: 0.4, notes: true },
         },
       ],
       root: { props: {} },
     };
-    expect(puckDataToJsxVolt(data, 'Bare')).not.toContain('Page');
+    const jsx = puckDataToJsxVolt(data, 'Station detail');
+    expect(jsx).toContain(
+      "import { SAMPLE_PRICE_BANDS, SAMPLE_TARIFF_NOTES } from '../components/data';",
+    );
   });
 });

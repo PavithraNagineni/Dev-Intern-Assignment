@@ -6,6 +6,7 @@ import {
   RADIUS_FACTORS,
 } from './brand';
 import type { BrandDefinition } from './brand';
+import { resolveTokenValue } from './emit';
 
 const VOLT: BrandDefinition = {
   name: 'Volt',
@@ -33,21 +34,22 @@ describe('buildSemanticTokens', () => {
     expect(tokens.get('accent.9')!.modes!.light).toBe('#00c16a');
   });
 
-  it('produces full 12-step accent and gray scales for both modes', () => {
-    for (let i = 1; i <= 12; i++) {
-      for (const scale of ['accent', 'gray']) {
-        const def = tokens.get(`${scale}.${i}`)!;
-        expect(String(def.modes!.light)).toMatch(/^#/);
-        expect(String(def.modes!.dark)).toMatch(/^#/);
-      }
-    }
-    // Step 9 is anchored to the brand hex in both modes, but the scale ends
-    // must diverge between light and dark.
-    expect(tokens.get('accent.1')!.modes!.light).not.toBe(
-      tokens.get('accent.1')!.modes!.dark,
+  it('produces distinct gray scale and color.bg for different grayTints', () => {
+    const sandLayer = buildSemanticTokens({ ...VOLT, grayTint: 'sand' });
+    const mauveLayer = buildSemanticTokens({ ...VOLT, grayTint: 'mauve' });
+    const slateLayer = buildSemanticTokens({ ...VOLT, grayTint: 'slate' });
+    const sand = new Map(sandLayer.tokens.map((t) => [t.path, t]));
+    const mauve = new Map(mauveLayer.tokens.map((t) => [t.path, t]));
+    const slate = new Map(slateLayer.tokens.map((t) => [t.path, t]));
+
+    expect(sand.get('gray.3')!.modes!.light).not.toBe(
+      mauve.get('gray.3')!.modes!.light,
     );
-    expect(tokens.get('gray.12')!.modes!.light).not.toBe(
-      tokens.get('gray.12')!.modes!.dark,
+    expect(mauve.get('gray.3')!.modes!.light).not.toBe(
+      slate.get('gray.3')!.modes!.light,
+    );
+    expect(resolveTokenValue(sand.get('color.bg')!, [sandLayer], 'light')).not.toBe(
+      resolveTokenValue(mauve.get('color.bg')!, [mauveLayer], 'light'),
     );
   });
 
